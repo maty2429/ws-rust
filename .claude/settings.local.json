@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rustc --version)",
+      "Bash(cargo check *)",
+      "Bash(~/.cargo/bin/cargo check *)",
+      "Bash(/mnt/c/Users/matia/.cargo/bin/cargo.exe check *)",
+      "Bash(go build *)"
+    ]
+  }
+}

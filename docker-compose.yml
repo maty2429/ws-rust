@@ -1,0 +1,9 @@
+services:
+  websocket:
+    build: .
+    container_name: realtime-ws
+    ports:
+      - "3001:3001"
+    environment:
+      - RUST_LOG=websocket=warn
+    restart: unless-stopped
