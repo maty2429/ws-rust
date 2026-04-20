@@ -1,6 +1,6 @@
 use axum::{Json, extract::State, http::StatusCode};
 use std::sync::Arc;
-use tracing::debug;
+use tracing::{debug, warn};
 
 use crate::models::event::Event;
 use crate::AppState;
@@ -16,7 +16,8 @@ pub async fn emit_handler(
             debug!("Broadcasted to {} receivers", receivers);
             StatusCode::OK
         }
-        Err(_) => {
+        Err(err) => {
+            warn!("Broadcast send failed: {}", err);
             StatusCode::OK
         }
     }

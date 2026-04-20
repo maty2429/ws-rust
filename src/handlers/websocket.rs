@@ -37,7 +37,7 @@ async fn handle_socket(mut socket: WebSocket, state: Arc<AppState>) {
                 }
             }
             Err(tokio::sync::broadcast::error::RecvError::Lagged(n)) => {
-                warn!("Client lagged, missed {} messages", n);
+                warn!("WebSocket client lagged, missed {} messages", n);
                 // Seguimos, no desconectamos por lag
             }
             Err(tokio::sync::broadcast::error::RecvError::Closed) => {

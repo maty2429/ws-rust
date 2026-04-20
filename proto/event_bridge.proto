@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package eventbridge.v1;
+
+service EventBridge {
+  rpc PublishEvent(PublishEventRequest) returns (PublishEventResponse);
+}
+
+message PublishEventRequest {
+  string event_type = 1;
+  string payload_json = 2;
+  string timestamp = 3;
+}
+
+message PublishEventResponse {
+  bool accepted = 1;
+}

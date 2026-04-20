@@ -4,6 +4,8 @@ services:
     container_name: realtime-ws
     ports:
       - "3001:3001"
+      - "50051:50051"
     environment:
       - RUST_LOG=websocket=warn
+      - WS_GRPC_BIND_ADDR=0.0.0.0:50051
     restart: unless-stopped
