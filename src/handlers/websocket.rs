@@ -20,6 +20,21 @@ async fn handle_socket(mut socket: WebSocket, state: Arc<AppState>) {
 
     debug!("WebSocket client connected");
 
+    if let Some(snapshot) = state.latest_dashboard_tickets_por_estado().await {
+        let json = match serde_json::to_string(&snapshot) {
+            Ok(s) => s,
+            Err(e) => {
+                warn!("Failed to serialize dashboard snapshot: {}", e);
+                return;
+            }
+        };
+
+        if socket.send(Message::Text(json.into())).await.is_err() {
+            debug!("WebSocket client disconnected before receiving snapshot");
+            return;
+        }
+    }
+
     loop {
         match rx.recv().await {
             Ok(event) => {

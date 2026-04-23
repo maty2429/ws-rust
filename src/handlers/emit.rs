@@ -11,14 +11,12 @@ pub async fn emit_handler(
 ) -> StatusCode {
     debug!("Received event: type={} payload={}", event.event_type, event.payload);
 
-    match state.tx.send(event) {
-        Ok(receivers) => {
-            debug!("Broadcasted to {} receivers", receivers);
-            StatusCode::OK
-        }
-        Err(err) => {
-            warn!("Broadcast send failed: {}", err);
-            StatusCode::OK
-        }
+    let receivers = state.publish(event).await;
+    if receivers == 0 {
+        warn!("No active WebSocket receivers; snapshot retained if applicable");
+    } else {
+        debug!("Broadcasted to {} receivers", receivers);
     }
+
+    StatusCode::OK
 }

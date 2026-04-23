@@ -1,6 +1,6 @@
 use axum::{Router, routing::{get, post}, http::StatusCode};
 use std::sync::Arc;
-use tokio::sync::broadcast;
+use tokio::sync::{RwLock, broadcast};
 use tower_http::cors::{Any, CorsLayer};
 use tracing::{error, info};
 use tonic::transport::Server;
@@ -17,6 +17,30 @@ use models::event::Event;
 
 pub struct AppState {
     pub tx: broadcast::Sender<Event>,
+    latest_dashboard_tickets_por_estado: RwLock<Option<Event>>,
+}
+
+impl AppState {
+    pub async fn publish(&self, event: Event) -> usize {
+        self.remember_snapshot(&event).await;
+        match self.tx.send(event) {
+            Ok(receivers) => receivers,
+            Err(_) => 0,
+        }
+    }
+
+    pub async fn latest_dashboard_tickets_por_estado(&self) -> Option<Event> {
+        self.latest_dashboard_tickets_por_estado.read().await.clone()
+    }
+
+    async fn remember_snapshot(&self, event: &Event) {
+        if event.event_type != "dashboard.tickets_por_estado.updated" {
+            return;
+        }
+
+        let mut guard = self.latest_dashboard_tickets_por_estado.write().await;
+        *guard = Some(event.clone());
+    }
 }
 
 const DEFAULT_BIND_ADDR: &str = "0.0.0.0:3001";
@@ -40,7 +64,10 @@ async fn main() {
 
     let (tx, _) = broadcast::channel::<Event>(broadcast_capacity);
 
-    let state = Arc::new(AppState { tx });
+    let state = Arc::new(AppState {
+        tx,
+        latest_dashboard_tickets_por_estado: RwLock::new(None),
+    });
 
     let cors = CorsLayer::new()
         .allow_origin(Any)

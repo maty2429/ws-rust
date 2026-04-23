@@ -44,8 +44,8 @@ impl EventBridge for EventBridgeService {
             event.event_type, event.payload
         );
 
-        let accepted = self.state.tx.send(event).is_ok();
+        self.state.publish(event).await;
 
-        Ok(Response::new(PublishEventResponse { accepted }))
+        Ok(Response::new(PublishEventResponse { accepted: true }))
     }
 }

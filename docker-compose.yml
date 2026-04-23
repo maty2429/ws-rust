@@ -1,11 +1,14 @@
 services:
   websocket:
     build: .
-    container_name: realtime-ws
+    image: ${WS_IMAGE:-wingsjuanka/hcsba-websocket-rust:latest}
+    container_name: ${WS_CONTAINER_NAME:-realtime-ws}
     ports:
-      - "3001:3001"
-      - "50051:50051"
+      - "${WS_HOST_PORT:-3001}:${WS_CONTAINER_PORT:-3001}"
+      - "${WS_GRPC_HOST_PORT:-50051}:${WS_GRPC_CONTAINER_PORT:-50051}"
     environment:
-      - RUST_LOG=websocket=warn
-      - WS_GRPC_BIND_ADDR=0.0.0.0:50051
+      RUST_LOG: "${RUST_LOG:-websocket=warn}"
+      WS_BIND_ADDR: "0.0.0.0:${WS_CONTAINER_PORT:-3001}"
+      WS_GRPC_BIND_ADDR: "0.0.0.0:${WS_GRPC_CONTAINER_PORT:-50051}"
+      WS_BROADCAST_CAPACITY: "${WS_BROADCAST_CAPACITY:-4096}"
     restart: unless-stopped
